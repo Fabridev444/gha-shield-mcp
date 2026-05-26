@@ -20,13 +20,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Compute tag
+      - name: Compute tag + lowercase owner
         id: tag
-        run: echo "tag=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+        run: |
+          echo "tag=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+          echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
       - uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/gha-shield-mcp:${{ steps.tag.outputs.tag }}
-            ghcr.io/${{ github.repository_owner }}/gha-shield-mcp:latest
+            ghcr.io/${{ steps.tag.outputs.owner }}/gha-shield-mcp:${{ steps.tag.outputs.tag }}
+            ghcr.io/${{ steps.tag.outputs.owner }}/gha-shield-mcp:latest
